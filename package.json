@@ -1,18 +1,19 @@
 {
-  "name": "tw-setup",
+  "name": "tailwind-setup",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Instant Tailwind CSS setup CLI for Vite/Next.js",
   "bin": {
     "tailwind-setup": "./bin/index.js"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
+  "keywords": [
+    "tailwind",
+    "vite",
+    "cli",
+    "setup"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
