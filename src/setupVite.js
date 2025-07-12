@@ -1,0 +1,156 @@
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import { parse, stringify } from "comment-json";
+
+export async function setupTailwindVite() {
+  console.log("📦 Installing Tailwind CSS (v5 style)...");
+  execSync("npm install tailwindcss @tailwindcss/vite", { stdio: "inherit" });
+  execSync("npm install -D @types/node", { stdio: "inherit" });
+
+  console.log("⚙️ Initializing Tailwind config...");
+
+  // ✅ Ensure src/index.css exists and is clean
+  const cssDir = path.join("src");
+  const cssPath = path.join(cssDir, "index.css");
+
+  if (!fs.existsSync(cssDir)) {
+    fs.mkdirSync(cssDir, { recursive: true });
+    console.log(`📁 Created missing directory: ${cssDir}`);
+  }
+
+  fs.writeFileSync(cssPath, `@import "tailwindcss";\n`);
+  console.log("✅ Created or updated src/index.css with Tailwind import");
+
+  // ✅ Update tsconfig.app.json or tsconfig.json if it exists
+  const tsconfigCandidates = ["tsconfig.app.json", "tsconfig.json"];
+  for (const tsPath of tsconfigCandidates) {
+    if (fs.existsSync(tsPath)) {
+      try {
+        const tsconfig = parse(fs.readFileSync(tsPath, "utf-8"));
+        tsconfig.compilerOptions = tsconfig.compilerOptions || {};
+
+        // Add only if src directory exists
+        if (fs.existsSync("src")) {
+          tsconfig.compilerOptions.baseUrl = ".";
+          tsconfig.compilerOptions.paths = {
+            ...(tsconfig.compilerOptions.paths || {}),
+            "@/*": ["./src/*"],
+          };
+          fs.writeFileSync(tsPath, stringify(tsconfig, null, 2));
+          console.log(`✅ Updated ${tsPath} with baseUrl and path alias`);
+        } else {
+          console.log(
+            `ℹ️ Skipped path alias in ${tsPath} — "src" folder missing`
+          );
+        }
+      } catch (err) {
+        console.warn(`⚠️ Could not parse or update ${tsPath}:`, err.message);
+      }
+    }
+  }
+
+  // ✅ Detect and overwrite vite.config.ts or vite.config.js
+  const isTypeScriptProject =
+    fs.existsSync("tsconfig.json") || fs.existsSync("tsconfig.app.json");
+  const viteConfigPath = fs.existsSync("vite.config.ts")
+    ? "vite.config.ts"
+    : "vite.config.js";
+
+  const isTSConfig = viteConfigPath.endsWith(".ts");
+  const viteImportPath = isTSConfig
+    ? `import path from "path";\nimport tailwindcss from "@tailwindcss/vite";\nimport react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";`
+    : `const path = require("path");\nconst tailwindcss = require("@tailwindcss/vite");\nconst react = require("@vitejs/plugin-react");\nconst { defineConfig } = require("vite");`;
+
+  const viteExport = isTSConfig
+    ? `export default defineConfig({\n  plugins: [react(), tailwindcss()],\n  resolve: {\n    alias: {\n      "@": path.resolve(__dirname, "./src"),\n    },\n  },\n});`
+    : `module.exports = defineConfig({\n  plugins: [react(), tailwindcss()],\n  resolve: {\n    alias: {\n      "@": path.resolve(__dirname, "./src"),\n    },\n  },\n});`;
+
+  const finalViteConfig = `${viteImportPath}\n\n// https://vite.dev/config/\n${viteExport}\n`;
+
+  fs.writeFileSync(viteConfigPath, finalViteConfig);
+  console.log(`✅ Overwrote ${viteConfigPath} with Tailwind + React setup`);
+
+  // ✅ Remove App.css if exists
+  const appCssPath = path.join("src", "App.css");
+  if (fs.existsSync(appCssPath)) {
+    fs.rmSync(appCssPath);
+    console.log("🧹 Removed legacy App.css");
+  }
+
+  // ✅ Create minimal App.tsx or App.jsx
+  const useTS =
+    fs.existsSync("tsconfig.json") || fs.existsSync("tsconfig.app.json");
+  const appComponentPath = path.join("src", useTS ? "App.tsx" : "App.jsx");
+
+  const appComponentContent = `export default function App() {
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center px-4">
+      <div className="max-w-xl text-center space-y-6">
+        <h1 className="text-4xl font-extrabold text-teal-400">🚀 Tailwind Setup Complete!</h1>
+        <p className="text-lg text-gray-300">
+          You're now ready to build with Tailwind CSS in your Vite project.
+        </p>
+
+        <div className="bg-gray-800 p-4 rounded-lg text-left shadow-md">
+          <p className="font-semibold text-teal-300 mb-2">Next steps:</p>
+          <pre className="text-sm text-gray-200">
+            <code>
+              npm run dev<br />
+              # or<br />
+              pnpm dev / yarn dev
+            </code>
+          </pre>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+          <a
+            href="https://tailwindcss.com/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded text-sm font-medium"
+          >
+            📘 Tailwind Docs
+          </a>
+          <a
+            href="https://github.com/your-username/tailwind-setup-cli"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-medium"
+          >
+            ⭐ Give a Star
+          </a>
+        </div>
+
+        <p className="text-xs text-gray-500 mt-6">
+          Generated by <span className="text-teal-400 font-medium">tailwind-setup</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+`;
+
+  fs.writeFileSync(appComponentPath, appComponentContent);
+  console.log(`✅ Wrote new Tailwind-based ${useTS ? "App.tsx" : "App.jsx"}`);
+
+  // ✅ Replace main.tsx or main.jsx
+  const mainPath = path.join("src", useTS ? "main.tsx" : "main.jsx");
+  const mainContent = `import React from "react";
+  import ReactDOM from "react-dom/client";
+  import App from "./App";
+  import "./index.css";
+
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+`;
+
+  fs.writeFileSync(mainPath, mainContent);
+  console.log(
+    `✅ Rewritten ${useTS ? "main.tsx" : "main.jsx"} with Tailwind app root`
+  );
+}
