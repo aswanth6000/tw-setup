@@ -92,17 +92,6 @@ export async function setupTailwindVite() {
           You're now ready to build with Tailwind CSS in your Vite project.
         </p>
 
-        <div className="bg-gray-800 p-4 rounded-lg text-left shadow-md">
-          <p className="font-semibold text-teal-300 mb-2">Next steps:</p>
-          <pre className="text-sm text-gray-200">
-            <code>
-              npm run dev<br />
-              # or<br />
-              pnpm dev / yarn dev
-            </code>
-          </pre>
-        </div>
-
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
           <a
             href="https://tailwindcss.com/docs"
@@ -113,7 +102,7 @@ export async function setupTailwindVite() {
             📘 Tailwind Docs
           </a>
           <a
-            href="https://github.com/your-username/tailwind-setup-cli"
+            href="https://github.com/aswanth6000/tw-setup"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-medium"
