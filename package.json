@@ -12,7 +12,7 @@
     "cli",
     "setup"
   ],
-  "author": "Your Name",
+  "author": "Aswanth Alakkadan ",
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.4.1",
