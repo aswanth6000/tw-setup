@@ -1,6 +1,6 @@
 {
   "name": "tw-setup",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Instant Tailwind CSS setup CLI for Vite/Next.js",
   "bin": {
     "tw-setup": "./bin/index.js"
