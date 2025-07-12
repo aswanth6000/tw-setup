@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "Instant Tailwind CSS setup CLI for Vite/Next.js",
   "bin": {
-    "tailwind-setup": "./bin/index.js"
+    "tw-setup": "./bin/index.js"
   },
   "type": "module",
   "keywords": [
